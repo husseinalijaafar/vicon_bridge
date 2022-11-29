@@ -374,7 +374,12 @@ private:
   {
     boost::thread(&ViconReceiver::createSegmentThread, this, subject_name, segment_name);
   }
-
+  std::time_t convertWalltimeToEpochTime(struct tm t)
+  {
+    t_
+    time_t epoch_time = mktime(&t);
+    return epoch_time;
+  }
   void grabThread()
   {
     ros::Duration d(1.0 / 240.0);  // TODO: Configurable
@@ -386,6 +391,7 @@ private:
         ROS_INFO("getFrame returned false");
         d.sleep();
       }
+      Output_GetTimecode _Output_GetTimecode  = vicon_client_.GetTimecode()
       now_time = ros::Time::now();
 
       bool was_new_frame = process_frame();
