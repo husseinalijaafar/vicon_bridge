@@ -374,12 +374,7 @@ private:
   {
     boost::thread(&ViconReceiver::createSegmentThread, this, subject_name, segment_name);
   }
-  std::time_t convertWalltimeToEpochTime(struct tm t)
-  {
-    t_
-    time_t epoch_time = mktime(&t);
-    return epoch_time;
-  }
+
   void grabThread()
   {
     ros::Duration d(1.0 / 240.0);  // TODO: Configurable
@@ -391,8 +386,30 @@ private:
         ROS_INFO("getFrame returned false");
         d.sleep();
       }
-      Output_GetTimecode _Output_GetTimecode  = vicon_client_.GetTimecode()
-      now_time = ros::Time::now();
+      Output_GetTimecode _Output_GetTimecode  = vicon_client_.GetTimecode();
+
+      std::time_t local_time = std::time(0);   // get time now
+      std::tm* now = std::localtime(&local_time);
+      struct tm value;
+      value.tm_sec=_Output_GetTimecode.Seconds;
+      value.tm_min=_Output_GetTimecode.Minutes;
+      value.tm_hour=_Output_GetTimecode.Hours;
+      value.tm_mday=now->tm_mday;
+      value.tm_mon=now->tm_mon;
+      value.tm_year=now->tm_year;
+      value.tm_hour=1;
+      value.tm_wday=now->tm_wday;
+      value.tm_yday=now->tm_yday;
+      time_t epoch_time = mktime(&value);
+
+      Output_GetFrameRate Rate = MyClient.GetFrameRate();
+
+      double nano_secs = 0.0; 
+      // nano_secs = (frames + subframes/subframesperframe ) / fps 
+      // then multiply by 1E9 
+      nano_secs = ((_Output_GetTimecode.Frames + (_Output_GetTimecode.SubFrame / _Output_GetTimecode.SubFramesPerFrame)) / Rate.FrameRateHz)*1e9;
+      ros::Time now_time(epoch_time,nano_secs);
+
 
       bool was_new_frame = process_frame();
       ROS_WARN_COND(!was_new_frame, "grab frame returned false");
