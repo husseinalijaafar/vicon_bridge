@@ -402,7 +402,7 @@ private:
       value.tm_yday=now->tm_yday;
       time_t epoch_time = mktime(&value);
 
-      Output_GetFrameRate Rate = MyClient.GetFrameRate();
+      Output_GetFrameRate Rate = vicon_client_.GetFrameRate();
 
       double nano_secs = 0.0; 
       // nano_secs = (frames + subframes/subframesperframe ) / fps 
