@@ -36,7 +36,7 @@
 #include <iostream>
 #include <map>
 #include <unordered_map>
-
+#include <ctime>
 // ROS
 #include <ros/ros.h>
 #include <tf/tf.h>
@@ -388,29 +388,25 @@ private:
       }
       Output_GetTimecode _Output_GetTimecode  = vicon_client_.GetTimecode();
 
-      std::time_t local_time = std::time(0);   // get time now
-      std::tm* now = std::localtime(&local_time);
-      struct tm value;
-      value.tm_sec=_Output_GetTimecode.Seconds;
-      value.tm_min=_Output_GetTimecode.Minutes;
-      value.tm_hour=_Output_GetTimecode.Hours;
-      value.tm_mday=now->tm_mday;
-      value.tm_mon=now->tm_mon;
-      value.tm_year=now->tm_year;
-      value.tm_hour=1;
-      value.tm_wday=now->tm_wday;
-      value.tm_yday=now->tm_yday;
-      time_t epoch_time = mktime(&value);
+		struct tm *t2; 
+		time_t t1;
+		t1 = std::time(NULL);
+		t2 = localtime(&t1);
+		t2 -> tm_hour=int(_Output_GetTimecode.Hours);
+		t2 -> tm_min=int(_Output_GetTimecode.Minutes);
+		t2 -> tm_sec=int(_Output_GetTimecode.Seconds);
+	
+      time_t epoch_time = mktime(t2);
 
-      Output_GetFrameRate Rate = MyClient.GetFrameRate();
+      Output_GetFrameRate Rate = vicon_client_.GetFrameRate();
 
       double nano_secs = 0.0; 
       // nano_secs = (frames + subframes/subframesperframe ) / fps 
       // then multiply by 1E9 
-      nano_secs = ((_Output_GetTimecode.Frames + (_Output_GetTimecode.SubFrame / _Output_GetTimecode.SubFramesPerFrame)) / Rate.FrameRateHz)*1e9;
-      ros::Time now_time(epoch_time,nano_secs);
-
-
+      nano_secs = int(((_Output_GetTimecode.Frames + (_Output_GetTimecode.SubFrame / _Output_GetTimecode.SubFramesPerFrame)) / Rate.FrameRateHz)*1e9);
+      //ros::Time now_time(epoch_time,0);
+		now_time = ros::Time::now();
+		std::cout << std::fixed << epoch_time << "." << nano_secs << std::endl;
       bool was_new_frame = process_frame();
       ROS_WARN_COND(!was_new_frame, "grab frame returned false");
 
