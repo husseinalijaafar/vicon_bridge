@@ -408,8 +408,9 @@ private:
 			uint32_t nsecs = (uint32_t) nano_secs;
       //ros::Time now_time(secs,nsecs);
 			now_time = ros::Time::now();
-			std::cout << std::fixed << secs << "." << nsecs << std::endl;
-    	bool was_new_frame = process_frame();
+			// std::cout << std::fixed << secs << "." << nsecs << std::endl;
+			ROS_INFO_STREAM("")
+    	bool was_new_frame = process_frame("vicon:" << secs << "." << nsecs);
     	ROS_WARN_COND(!was_new_frame, "grab frame returned false");
 
       diag_updater.update();
