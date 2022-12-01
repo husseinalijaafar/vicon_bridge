@@ -410,7 +410,7 @@ private:
 		now_time = vicon_time;
 		//now_time = ros::Time::now();
 		// std::cout << std::fixed << secs << "." << nsecs << std::endl;
-		ROS_INFO_STREAM("vicon time: " << secs << "." << nsecs);
+		//ROS_INFO_STREAM("vicon time: " << secs << "." << nsecs);
     	bool was_new_frame = process_frame();
     	ROS_WARN_COND(!was_new_frame, "grab frame returned false");
 
