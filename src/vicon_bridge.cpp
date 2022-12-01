@@ -463,12 +463,14 @@ private:
       //ROS_INFO_STREAM("test subtraction" << now_time - vicon_latency);
 		if(publish_tf_ || broadcast_tf_)
       {
+		 ROS_INFO_STREAM("vicon time: " << now_time.sec - vicon_latency.sec <<"."<< now_time.nsec - vicon_latency.nsec);
         process_subjects(now_time - vicon_latency);
       }
 
       if(publish_markers_)
       {
-        process_markers(now_time - vicon_latency, lastFrameNumber);
+		 ROS_INFO_STREAM("vicon time: " << now_time.sec - vicon_latency.sec <<"."<< now_time.nsec - vicon_latency.nsec);
+		 process_markers(now_time - vicon_latency, lastFrameNumber);
       }
 		//ROS_INFO_STREAM("line 471");
       lastTime = now_time;
