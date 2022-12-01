@@ -377,7 +377,7 @@ private:
 
   void grabThread()
   {
-    ros::Duration d(1.0 / 240.0);  // TODO: Configurable
+    ros::Duration d(1.0 / 120.0);  // TODO: Configurable
 
     while (ros::ok() && grab_frames_)
     {
@@ -388,27 +388,29 @@ private:
       }
       Output_GetTimecode _Output_GetTimecode  = vicon_client_.GetTimecode();
 
-		struct tm *t2; 
-		time_t t1;
-		t1 = std::time(NULL);
-		t2 = localtime(&t1);
-		t2 -> tm_hour=int(_Output_GetTimecode.Hours);
-		t2 -> tm_min=int(_Output_GetTimecode.Minutes);
-		t2 -> tm_sec=int(_Output_GetTimecode.Seconds);
-	
-      time_t epoch_time = mktime(t2);
+			struct tm *t2; 
+			time_t t1;
+			t1 = std::time(NULL);
+			t2 = localtime(&t1);
+			t2 -> tm_hour=int(_Output_GetTimecode.Hours);
+			t2 -> tm_min=int(_Output_GetTimecode.Minutes);
+			t2 -> tm_sec=int(_Output_GetTimecode.Seconds);
+		
+			time_t epoch_time = mktime(t2);
 
-      Output_GetFrameRate Rate = vicon_client_.GetFrameRate();
+			Output_GetFrameRate Rate = vicon_client_.GetFrameRate();
 
-      double nano_secs = 0.0; 
+    	double nano_secs = 0.0; 
       // nano_secs = (frames + subframes/subframesperframe ) / fps 
       // then multiply by 1E9 
-      nano_secs = int(((_Output_GetTimecode.Frames + (_Output_GetTimecode.SubFrame / _Output_GetTimecode.SubFramesPerFrame)) / Rate.FrameRateHz)*1e9);
-      //ros::Time now_time(epoch_time,0);
-		now_time = ros::Time::now();
-		std::cout << std::fixed << epoch_time << "." << nano_secs << std::endl;
-      bool was_new_frame = process_frame();
-      ROS_WARN_COND(!was_new_frame, "grab frame returned false");
+    	nano_secs = ((_Output_GetTimecode.Frames + (_Output_GetTimecode.SubFrame / _Output_GetTimecode.SubFramesPerFrame)) / Rate.FrameRateHz)*(1000000000);
+			uint32_t secs = (uint32_t) epoch_time; 
+			uint32_t nsecs = (uint32_t) nano_secs;
+      //ros::Time now_time(secs,nsecs);
+			now_time = ros::Time::now();
+			std::cout << std::fixed << secs << "." << nsecs << std::endl;
+    	bool was_new_frame = process_frame();
+    	ROS_WARN_COND(!was_new_frame, "grab frame returned false");
 
       diag_updater.update();
     }
